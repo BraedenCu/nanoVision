@@ -1,0 +1,93 @@
+#FROM balenalib/jetson-tx2-ubuntu:focal
+FROM balenalib/jetson-nano-ubuntu:focal
+#ARG URL=http://developer.download.nvidia.com/devzone/devcenter/mobile/jetpack_l4t/3.2/pwv346/JetPackL4T_32_b157
+
+# Update packages, install some useful packages
+ARG DEBIAN_FRONTEND=noninteractive
+
+# setup timezone
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -q -y --no-install-recommends tzdata
+
+# install packages
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+    dirmngr \
+    gnupg2 \
+    git \
+    wget \
+    htop
+
+# setup keys
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+# setup sources.list
+RUN echo "deb http://packages.ros.org/ros2/ubuntu focal main" > /etc/apt/sources.list.d/ros2-latest.list
+
+
+# setup environment
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+ENV ROS2_DISTRO foxy
+ENV ROS_DISTRO foxy
+
+# install ros2 packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-foxy-ros-core=0.9.2-1* 
+
+RUN touch /root/.bashrc
+RUN echo "source /opt/ros/foxy/setup.bash" >> root/.bashrc
+
+#Ros Tools
+# install bootstrap tools
+RUN apt-get install --no-install-recommends -y \
+    build-essential \
+    git \
+    python3-colcon-common-extensions \
+    python3-colcon-mixin \
+    python3-rosdep \
+    python3-vcstool 
+
+# bootstrap rosdep
+RUN rosdep init && \
+  rosdep update --rosdistro foxy
+
+
+# install ros2 packages
+RUN apt-get install -y --no-install-recommends \
+    ros-foxy-ros-base=0.9.2-1* 
+
+RUN apt install -y --no-install-recommends i2c-tools
+RUN apt-get install -y --no-install-recommends python3-pip
+#for use getting imu data. Only use temporarily until c++ alternative is either found or created. 
+RUN pip3 install adafruit-circuitpython-bno055
+RUN pip3 install Jetson.GPIO
+
+
+
+#SDKs
+#RUN mkdir -p /root/sdks/src
+#WORKDIR /root/sdks/src
+
+#ENV INITSYSTEM on
+#rplidar
+#RUN git clone https://github.com/Slamtec/rplidar_sdk
+#WORKDIR /root/sdks/src/rplidar_sdk/sdk
+#RUN make 
+#RUN echo 'rplidar is locaed in cd output/Linux/Release'
+#RUN echo 'rplidar run test: ./ultra_simple or ./ultra_simple /dev/ttyUSB0'
+
+#Stereolabs ROS2 Does not work since Stererolabs sdk requires focal/cuda and jetpack only support bionic.  use bridge
+
+RUN rm -rf /var/lib/apt/lists/*
+WORKDIR /root/development
+COPY ./development /root/development
+#RUN . install/setup.bash
+
+
+RUN echo %%BALENA_MACHINE_NAME%%
+
+CMD modprobe i2c-dev && python /app/demo.py
+CMD ["bash"]
