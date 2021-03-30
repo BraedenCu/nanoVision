@@ -85,5 +85,16 @@ RUN pip3 install numpy
 
 RUN echo %%BALENA_MACHINE_NAME%%
 
-CMD modprobe i2c-dev && python /app/demo.py
+#realsense stuff
+RUN echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' || tee /etc/apt/sources.list.d/realsense-public.list
+RUN apt-key adv --keyserver keys.gnupg.net --recv-key C8B3A55A6F3EFCDE || apt-key adv --keyserver hkp://keys.gnupg.net:80 --recv-key C8B3A55A6F3EFCDE
+RUN add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main"
+RUN apt-get update -qq
+RUN apt-get install librealsense2-dkms --allow-unauthenticated -y
+RUN apt-get install librealsense2-dev --allow-unauthenticated -y
+
+RUN git clone https://github.com/BraedenCu/nanoVision.git
+
+RUN apt-get install ffmpeg libsm6 libxext6  -y
+
 CMD ["bash"]

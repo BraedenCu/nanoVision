@@ -6,7 +6,11 @@ services:
     network_mode: host
     devices:
       - '/dev:/dev'
+      -  /dev/ttyUSB0:/dev/ttyUSB0
+      -  /dev/ttyUSB1:/dev/ttyUSB1
+      -  /dev/ttyUSB2:/dev/ttyUSB2
     labels:
       io.balena.features.balena-socket: '1'
       io.balena.features.dbus: '1'
       io.balena.features.kernel-modules: '1'
+  
