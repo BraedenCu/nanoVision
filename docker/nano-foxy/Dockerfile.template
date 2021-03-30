@@ -61,10 +61,11 @@ RUN apt-get install -y --no-install-recommends \
 
 RUN apt install -y --no-install-recommends i2c-tools
 RUN apt-get install -y --no-install-recommends python3-pip
-#for use getting imu data. Only use temporarily until c++ alternative is either found or created. 
+
 RUN pip3 install adafruit-circuitpython-bno055
 RUN pip3 install Jetson.GPIO
-
+RUN pip3 install opencv-python
+RUN pip3 install numpy
 
 
 #SDKs
@@ -80,11 +81,6 @@ RUN pip3 install Jetson.GPIO
 #RUN echo 'rplidar run test: ./ultra_simple or ./ultra_simple /dev/ttyUSB0'
 
 #Stereolabs ROS2 Does not work since Stererolabs sdk requires focal/cuda and jetpack only support bionic.  use bridge
-
-RUN rm -rf /var/lib/apt/lists/*
-WORKDIR /root/development
-COPY ./development /root/development
-#RUN . install/setup.bash
 
 
 RUN echo %%BALENA_MACHINE_NAME%%
